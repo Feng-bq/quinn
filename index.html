@@ -352,6 +352,14 @@
             color: white;
             text-align: center;
             padding: 20px;
+            /* 添加以下属性确保在微信中能正确隐藏 */
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .music-prompt.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
 
         .music-prompt h3 {
@@ -667,9 +675,11 @@
             bgMusic.play().then(() => {
                 isPlaying = true;
                 musicPlayer.classList.add('playing');
-                musicPrompt.style.display = 'none';
             }).catch(err => {
                 console.log('自动播放失败:', err);
+            }).finally(() => {
+                // 无论如何都隐藏提示框
+                musicPrompt.style.display = 'none';
             });
         });
 
@@ -679,7 +689,9 @@
                 bgMusic.pause();
                 musicPlayer.classList.remove('playing');
             } else {
-                bgMusic.play();
+                bgMusic.play().catch(err => {
+                    console.log('播放失败:', err);
+                });
                 musicPlayer.classList.add('playing');
             }
             isPlaying = !isPlaying;

@@ -357,8 +357,9 @@
         }
 
         .music-prompt.hidden {
-            opacity: 0;
+            display: none !important;
             visibility: hidden;
+            opacity: 0;
             pointer-events: none;
         }
 
@@ -679,7 +680,7 @@
                 console.log('自动播放失败:', err);
             }).finally(() => {
                 // 无论如何都隐藏提示框
-                musicPrompt.style.display = 'none';
+                musicPrompt.classList.add('hidden');
             });
         });
 

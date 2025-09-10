@@ -402,10 +402,10 @@
         }
 
         .music-prompt.hidden {
-            display: none !important;
-            visibility: hidden;
             opacity: 0;
+            visibility: hidden;
             pointer-events: none;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
         .music-prompt h3 {
@@ -726,17 +726,41 @@
         const startButton = document.getElementById('startButton');
         let isPlaying = false;
 
+        // 页面加载完成后尝试自动播放
+        window.addEventListener('load', function() {
+            // 尝试自动播放
+            const playPromise = bgMusic.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // 自动播放成功
+                    isPlaying = true;
+                    musicPlayer.classList.add('playing');
+                    hideMusicPrompt();
+                }).catch(error => {
+                    // 自动播放失败，显示提示框
+                    console.log('自动播放被阻止:', error);
+                    musicPrompt.classList.remove('hidden');
+                });
+            }
+        });
+
         // 点击开始按钮
         startButton.addEventListener('click', function() {
-            bgMusic.play().then(() => {
-                isPlaying = true;
-                musicPlayer.classList.add('playing');
-            }).catch(err => {
-                console.log('自动播放失败:', err);
-            }).finally(() => {
-                // 无论如何都隐藏提示框
-                musicPrompt.classList.add('hidden');
-            });
+            const playPromise = bgMusic.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    isPlaying = true;
+                    musicPlayer.classList.add('playing');
+                    hideMusicPrompt();
+                }).catch(error => {
+                    console.log('播放失败:', error);
+                    hideMusicPrompt(); // 即使播放失败也隐藏提示框
+                });
+            } else {
+                hideMusicPrompt();
+            }
         });
 
         // 音乐播放器控制
@@ -752,6 +776,19 @@
             }
             isPlaying = !isPlaying;
         });
+
+        // 隐藏提示框的函数
+        function hideMusicPrompt() {
+            musicPrompt.classList.add('hidden');
+        }
+
+        // 在 DOMContentLoaded 或 window.load 事件中添加以下代码
+        // 设置3秒超时，防止提示框永久遮挡
+        setTimeout(function() {
+            if (!musicPrompt.classList.contains('hidden')) {
+                hideMusicPrompt();
+            }
+        }, 3000);
 
         // 触摸设备自动滚动照片
         let touchStartY = 0;
